@@ -3,7 +3,11 @@ const path = require("path");
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-import vitePluginImp from "vite-plugin-imp";
+// 按需加载
+import vitePluginForArco from "@arco-plugins/vite-react";
+
+const { plugin: mdPlugin, Mode } = require("vite-plugin-markdown");
+import hljs from "highlight.js";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,18 +19,31 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    vitePluginImp({
-      libList: [
-        {
-          libName: "@arco-design/web-react",
-          style: (name) => {
-            return [
-              "@arco-design/web-react/lib/style/index.less",
-              `@arco-design/web-react/lib/${name}/style/index.less`,
-            ];
-          },
+    vitePluginForArco(),
+    mdPlugin({
+      mode: [Mode.HTML, Mode.TOC, Mode.REACT],
+      markdownIt: {
+        html: true,
+        linkify: false,
+        typographer: true,
+        highlight: function (str, lang) {
+          if (lang && hljs.getLanguage(lang)) {
+            try {
+              return (
+                '<pre class="hljs"><code>' +
+                hljs.highlight(lang, str, true).value +
+                "</code></pre>"
+              );
+            } catch (__) {}
+          }
+
+          return (
+            '<pre class="hljs"><code>' +
+            hljs.highlight(lang, str, true).value +
+            "</code></pre>"
+          );
         },
-      ],
+      },
     }),
   ],
   css: {
