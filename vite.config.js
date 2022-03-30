@@ -49,6 +49,10 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       less: {
+        additionalData: `@import "${path.resolve(
+          __dirname,
+          "src/styles/variable.less"
+        )}";`,
         // 支持内联 JavaScript
         javascriptEnabled: true,
       },
