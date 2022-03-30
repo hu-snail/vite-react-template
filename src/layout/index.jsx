@@ -10,18 +10,22 @@ export default function index() {
   return (
     <Layout className="layout-container" style={{ height: "100vh" }}>
       <Header className="layout-header">
-        <Menu mode="horizontal" defaultSelectedKeys={["1"]}>
-          <MenuItem key="0" style={{ padding: 0, marginRight: 38 }} disabled>
-            <h1>LOGO</h1>
-          </MenuItem>
-          <MenuItem key="1">首页</MenuItem>
-          <MenuItem key="2">Solution</MenuItem>
-          <MenuItem key="3">Cloud Service</MenuItem>
-          <MenuItem key="4">Cooperation</MenuItem>
-        </Menu>
+        <div className="layout-header-wrap">
+          <Menu mode="horizontal" defaultSelectedKeys={["1"]}>
+            <MenuItem key="0" style={{ padding: 0, marginRight: 38 }} disabled>
+              <h1>LOGO</h1>
+            </MenuItem>
+            <MenuItem key="1">首页</MenuItem>
+            <MenuItem key="2">推荐</MenuItem>
+            <MenuItem key="3">文档</MenuItem>
+            <MenuItem key="4">工具下载</MenuItem>
+          </Menu>
+        </div>
       </Header>
       <Content>
-        <Outlet />
+        <div className="layout-content-wrap">
+          <Outlet />
+        </div>
       </Content>
       <Footer>Footer</Footer>
     </Layout>

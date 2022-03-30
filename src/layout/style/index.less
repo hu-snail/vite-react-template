@@ -3,17 +3,25 @@
 }
 
 .layout-header{
+  width: 100%;
+  background-color: var(--color-white);
+  &-wrap{
+    margin: 0 auto;
+  }
+}
+
+.layout-content-wrap{
   margin: 0 auto;
 }
 
 @media (min-width: 1260px) {
-  .layout-header{
+  .layout-header-wrap, .layout-content-wrap{
     max-width: 1170px;
   }
 }
 
 @media (min-width: 1500px) {
-  .layout-header{
+  .layout-header-wrap, .layout-content-wrap{
     max-width: 1410px;
   }
 }
