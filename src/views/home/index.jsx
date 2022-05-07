@@ -1,11 +1,12 @@
-import { Fragment } from "react";
-import { Carousel } from "@arco-design/web-react";
-// import { html, toc, attributes } from "../md/index.md";
-// import Md2Html from "@/compontents/Md2Html";
+import { Fragment, useEffect } from "react";
+import { Carousel,  } from "@arco-design/web-react";
+import { html, toc, attributes } from "../md/index.md";
+import Md2Html from "@/compontents/Md2Html";
 import "./home.less";
 const list = [1, 2, 3, 4];
 
 export default function Home() {
+  
   return (
     <Fragment>
       <Carousel indicatorType={"line"} style={{ height: "320px" }}>
@@ -17,6 +18,9 @@ export default function Home() {
         <div className="hot-card">
           <h4 className="card-title">热门常用：</h4>
         </div>
+          <div className="md-body">
+            <Md2Html html={html}/>
+          </div>
       </div>
     </Fragment>
   );

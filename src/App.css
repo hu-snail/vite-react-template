@@ -2,3 +2,7 @@
   background-color: #f5f5f5;
   overflow-x: hidden;
 }
+
+[contenteditable]:empty:after, .forcePlaceholder:after {
+  content: attr(placeholder);
+}
