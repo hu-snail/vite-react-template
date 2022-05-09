@@ -41,14 +41,6 @@ export default function Detail() {
       const contentRootNode = document.getElementById('editor-content')
       contentRootNode.prepend(rootNode)
       editNode.focus()
-      editNode.onfocus = function(e) {
-        if (state.currentNodeKey) state.nodeOptions.get(state.currentNodeKey).setAttribute('placeholder', ''); 
-        if (!e.target.innerHTML) e.target.setAttribute('placeholder', '输入“/”发起指令');
-        const currentNode = getRootParent(e.target)
-        dispatch({type: 'setCurrentNodeKey',payload: {
-          currentNodeKey: currentNode.getAttribute('data-block-id') 
-        } })
-      }
       // 禁止换行
       event.preventDefault()
     }
@@ -96,7 +88,6 @@ const getEditNode = (currentParentDom) => {
           currentNodeKey: null
         } })
         const currentDataBlockId = currentRoot.getAttribute('data-block-id')
-        console.log(currentDataBlockId, '====')
         state.nodeOptions.delete(currentDataBlockId)
         const currentDataIndex = state.nodeKeys.findIndex(key => key === currentDataBlockId)
         console.log(currentDataIndex, '----')
@@ -115,14 +106,6 @@ const getEditNode = (currentParentDom) => {
       const {rootNode, editNode} = createBlockElement()
       currentRoot.insertAdjacentElement("afterend", rootNode); 
       editNode.focus()
-      editNode.onfocus = function(e) {
-        if (state.currentNodeKey) state.nodeOptions.get(state.currentNodeKey).setAttribute('placeholder', ''); 
-        if (!e.target.innerHTML) e.target.setAttribute('placeholder', '输入“/”发起指令');
-        const currentNode = getRootParent(e.target)
-        dispatch({type: 'setCurrentNodeKey',payload: {
-          currentNodeKey: currentNode.getAttribute('data-block-id') 
-        } })
-      }
       // 禁止换行
       event.preventDefault()
     }
@@ -190,6 +173,18 @@ const getEditNode = (currentParentDom) => {
     editNode.setAttribute('contentEditable', true)
     editNode.setAttribute('style', 'max-width: 100%; width: 100%;white-space: pre-wrap;word-break: break-word;caret-color: rgb(55, 53, 47);padding: 3px 2px;')
     childNode.append(editNode)
+
+    editNode.onfocus = function(e) {
+      if (state.currentNodeKey) {
+        const editNode = getEditNode(state.nodeOptions.get(state.currentNodeKey))
+        editNode.setAttribute('placeholder', ''); 
+      }
+      if (!e.target.innerHTML) e.target.setAttribute('placeholder', '输入“/”发起指令');
+      const currentNode = getRootParent(e.target)
+      dispatch({type: 'setCurrentNodeKey',payload: {
+        currentNodeKey: currentNode.getAttribute('data-block-id') 
+      }})
+    }
 
     setNodeKeyData(dataBlockId, rootNode)
 
