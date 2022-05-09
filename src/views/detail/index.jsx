@@ -74,7 +74,7 @@ export default function Detail() {
  */
 const getEditNode = (currentParentDom) => {
   var editNode = currentParentDom;
-  if(editNode.childNodes.length && !root.getAttribute('contentEditable')){
+  if(editNode.childNodes.length && !editNode.getAttribute('contentEditable')){
     editNode = getEditNode(editNode.childNodes[0]);
   }
   return editNode;
