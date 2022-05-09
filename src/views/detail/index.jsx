@@ -1,14 +1,18 @@
-import React, {useState, useEffect} from "react";
+import React, { useReducer } from "react";
+import ReactDom from 'react-dom' 
 import styles from './style/detail.module.less'
 import { customAlphabet } from 'nanoid'
+import reducer from './reducer'
+
+const initialState = {
+  nodeOptions: new Map(),
+  currentNodeKey: null,
+  nodeKeys: []
+};
+
 
 export default function Detail() {
-  // 存放内容节点
-  const [nodeOptions, setNodeOptions] = useState(new Map())
-  const [nodeKeys, setNodeKeys] = useState([])
-
-  useEffect(() => {
-  }, [nodeOptions])
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   /**
    * @description 生成随机模块ID标识
@@ -33,121 +37,164 @@ export default function Detail() {
     console.log('键盘值：' + keyCode)
     // Enter换行
     if (keyCode === 13) {
-      console.log(event)
-      // 自动添加一行dom
-      addElement('editor-content', 'div', 'max-width: 100%; width: 100%; white-space: pre-wrap; word-break: break-word; caret-color: rgb(55, 53, 47); padding: 3px 2px; min-height: 1em; color: rgb(55, 53, 47); -webkit-text-fill-color: rgba(55, 53, 47, 0.5);')
+      const {rootNode, editNode} = createBlockElement()
+      const contentRootNode = document.getElementById('editor-content')
+      contentRootNode.prepend(rootNode)
+      editNode.focus()
+      editNode.onfocus = function(e) {
+        if (state.currentNodeKey) state.nodeOptions.get(state.currentNodeKey).setAttribute('placeholder', ''); 
+        if (!e.target.innerHTML) e.target.setAttribute('placeholder', '输入“/”发起指令');
+        const currentNode = getRootParent(e.target)
+        dispatch({type: 'setCurrentNodeKey',payload: {
+          currentNodeKey: currentNode.getAttribute('data-block-id') 
+        } })
+      }
       // 禁止换行
       event.preventDefault()
     }
   }
 
   /**
+   * @description 获取父级元素
+   * @param {*} currentDom
+   * @returns 
+   */
+  const getRootParent = (currentDom) => {
+    var root = currentDom;
+    // data-block-id不为空即可
+    if(root.parentNode && !root.getAttribute('data-block-id')){
+      root = getRootParent(root.parentNode);
+    }
+    return root;
+}
+
+/**
+ * @description 获取输入框节点
+ * @param {*} currentParentDom 
+ */
+const getEditNode = (currentParentDom) => {
+  var editNode = currentParentDom;
+  if(editNode.childNodes.length && !root.getAttribute('contentEditable')){
+    editNode = getEditNode(editNode.childNodes[0]);
+  }
+  return editNode;
+}
+
+
+  /**
+   * 
    * @description 文章内容按键事件处理
    * @param {*} event 
    */
   const onKeyDownContent = (event) => {
+    const currentRoot = getRootParent(event.target)
     const {keyCode} = event
     // Backspace
     if (keyCode === 8) {
-      // 当内容为空时，删除当前节点
       if (!event.target.innerHTML) {
-        const currentDataBlockId = event.target.getAttribute('data-block-id')
-        // 删除节点数据
-        nodeOptions.delete(currentDataBlockId)
-        // 如果是第一个元素节点，光标将移动到标题的末尾
-        const currentDataIndex = nodeKeys.findIndex(key => key === currentDataBlockId)
-        // 获取上一个节点，如果不是第一个节点则获取，否则不存在
-        const preNode = currentDataIndex ? nodeOptions.get(nodeKeys[currentDataIndex - 1]) : null
-        // 删除当前节点key
-        nodeKeys.splice(currentDataIndex, 1)
-        // 删除节点
-        event.target.remove()
-        // 是否存上一节点
-        if (preNode) {
-          preNode.focus()
-          // 获取光标范围
-          var range = document.createRange();
-          range.selectNodeContents(preNode);
-          range.collapse(false);
-          var sel = window.getSelection();
-          sel.removeAllRanges();
-          sel.addRange(range);
-          // 阻止删除行为
-          event.preventDefault()
-        } else {
-          // 第一个节点，添加标题光标
-          const titleNode = document.getElementById('editor-title')
-          titleNode.focus()
-        }
+        dispatch({type: 'setCurrentNodeKey',payload: {
+          currentNodeKey: null
+        } })
+        const currentDataBlockId = currentRoot.getAttribute('data-block-id')
+        console.log(currentDataBlockId, '====')
+        state.nodeOptions.delete(currentDataBlockId)
+        const currentDataIndex = state.nodeKeys.findIndex(key => key === currentDataBlockId)
+        console.log(currentDataIndex, '----')
+        const preNode = currentDataIndex ? state.nodeOptions.get(state.nodeKeys[currentDataIndex - 1]) : null
+        const titleNode = document.getElementById('editor-title')
+        state.nodeKeys.splice(currentDataIndex, 1)
+        currentRoot.remove()
+        if (preNode) setFocus(preNode)
+        else setFocus(titleNode)
       }
     }
     // Enter
     if (keyCode === 13) {
-      // 生成随机模块ID
-      const dataBlockId = generateRandomModuleId()
-      let elementToAdd = document.createElement('div'); 
-      elementToAdd.setAttribute('data-block-id', dataBlockId)
-      elementToAdd.setAttribute('style', 'max-width: 100%; width: 100%; white-space: pre-wrap; word-break: break-word; caret-color: rgb(55, 53, 47); padding: 3px 2px; min-height: 1em; color: rgb(55, 53, 47); -webkit-text-fill-color: rgba(55, 53, 47, 0.5);'); 
-      elementToAdd.setAttribute('contenteditable', 'true'); 
-      elementToAdd.setAttribute('spellcheck', 'true'); 
-      elementToAdd.setAttribute('placeholder', '输入“/”发起指令'); 
-      elementToAdd.setAttribute('data-content-editable-leaf', 'true'); 
-      // insertAdjacentElement 在当前节点后面追加node
-      event.target.insertAdjacentElement("afterend", elementToAdd); 
-      elementToAdd.focus()
-      // 存入节点数据
-      setNodeOptions(new Map([...nodeOptions, [dataBlockId, elementToAdd]]))
-      setNodeKeys([...nodeKeys, dataBlockId])
-      onContentChange()
-      elementToAdd.onfocus = function(e) {
-        onContentChange()
+      const hasText = event.target.innerHTML
+      if (!hasText) event.target.setAttribute('placeholder', ''); 
+      const {rootNode, editNode} = createBlockElement()
+      currentRoot.insertAdjacentElement("afterend", rootNode); 
+      editNode.focus()
+      editNode.onfocus = function(e) {
+        if (state.currentNodeKey) state.nodeOptions.get(state.currentNodeKey).setAttribute('placeholder', ''); 
+        if (!e.target.innerHTML) e.target.setAttribute('placeholder', '输入“/”发起指令');
+        const currentNode = getRootParent(e.target)
+        dispatch({type: 'setCurrentNodeKey',payload: {
+          currentNodeKey: currentNode.getAttribute('data-block-id') 
+        } })
       }
       // 禁止换行
       event.preventDefault()
     }
   }
 
-  // 监听内容变化
-  const onContentChange = () => {
-     let parentElement = document.getElementById('editor-content'); 
-     const childNodes = parentElement.childNodes
-     childNodes.forEach(item => {
-       // 判断光标是否停留在该元素
-       const isActiveElement = document.activeElement === item
-       // 内容为空，光标不在该元素则取消placeholder
-       if (!item.innerHTML && !isActiveElement)  item.setAttribute('placeholder', ' ')
-       // 内容为空，光标停留在该元素，则显示placeholder内容
-       else if (!item.innerHTML && isActiveElement) item.setAttribute('placeholder', '输入“/”发起指令')
-     })
+  /**
+   * @description 节点数据处理
+   * @param {*} dataBlockId
+   * @param {*} element 
+   */
+  const setNodeKeyData =  (dataBlockId, element) => {
+    dispatch({type: 'setNodeOptions',payload: {
+      nodeOptions: new Map([...state.nodeOptions, [dataBlockId, element]])
+    } })
+    dispatch({type: 'setNodeKeys',payload: {
+      nodeKeys: [...state.nodeKeys, dataBlockId]
+    } })
+    dispatch({type: 'setCurrentNodeKey',payload: {
+      currentNodeKey: dataBlockId
+    } })
   }
 
   /**
-   * @description 添加dom
-   * @param {*} parentId 父级Id
-   * @param {*} elementTag 元素标签
-   * @param {*} style 样式
+   * @description 获取焦点
+   * @param {*} node 
    */
-  const addElement = (parentId, elementTag, style) => { 
-    let parentElement = document.getElementById(parentId); 
-    let elementToAdd = document.createElement(elementTag); 
-    const dataBlockId = generateRandomModuleId()
-    elementToAdd.setAttribute('data-block-id', dataBlockId)
-    elementToAdd.setAttribute('style', style); 
-    elementToAdd.setAttribute('contenteditable', 'true'); 
-    elementToAdd.setAttribute('spellcheck', 'true'); 
-    elementToAdd.setAttribute('placeholder', '输入“/”发起指令'); 
-    elementToAdd.setAttribute('data-content-editable-leaf', 'true'); 
-    parentElement.prepend(elementToAdd); 
-    elementToAdd.focus()
-    // 存入节点数据
-    setNodeOptions(new Map([...nodeOptions, [dataBlockId, elementToAdd]]))
-    setNodeKeys([...nodeKeys, dataBlockId])
-    onContentChange()
-    elementToAdd.onfocus = function(e) {
-      onContentChange()
-    }
+  const setFocus = (node)  => {
+    const editNode = getEditNode(node)
+    editNode.focus()
+    // 获取光标范围
+    var range = document.createRange();
+    range.selectNodeContents(editNode);
+    range.collapse(false);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    // 阻止删除行为
+    window.event.preventDefault()
+  }
 
-} 
+
+  /**
+   * @description 创建模块dom
+   * @returns {*} rootNode:模块根节点 editNode：输入模块节点
+   */
+  const createBlockElement = () => {
+    // 生成随机模块ID
+    const dataBlockId = generateRandomModuleId()
+    let rootNode = document.createElement('div'); 
+    rootNode.setAttribute('data-block-id', dataBlockId)
+    rootNode.setAttribute('class', 'editor-selectable')
+    rootNode.setAttribute('style', 'width: 100%;max-width: 1691px; margin-top: 1px;marginBottom: 1px;')
+    const rootNodeChild = document.createElement('div');
+    rootNodeChild.setAttribute('style', 'color: inherit;fill:inherit')
+    rootNode.append(rootNodeChild)
+
+    const childNode = document.createElement('div');
+    childNode.setAttribute('style', 'display: flex;')
+    rootNodeChild.append(childNode)
+
+    const editNode = document.createElement('div');
+    editNode.setAttribute('placeholder', '输入“/”发起指令');
+    editNode.setAttribute('spellCheck', true)
+    editNode.setAttribute('data-content-editable-leaf', true)
+    editNode.setAttribute('contentEditable', true)
+    editNode.setAttribute('style', 'max-width: 100%; width: 100%;white-space: pre-wrap;word-break: break-word;caret-color: rgb(55, 53, 47);padding: 3px 2px;')
+    childNode.append(editNode)
+
+    setNodeKeyData(dataBlockId, rootNode)
+
+    return {rootNode, editNode}
+  }
 
   return <div className="hu-editor">
       <div className={styles['editor-head']} onKeyDown={onKeyDownTitle}>
