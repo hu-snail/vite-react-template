@@ -83,21 +83,25 @@ const getEditNode = (currentParentDom) => {
    */
   const onKeyDownContent = (event) => {
     const currentRoot = getRootParent(event.target)
+    const titleNode = document.getElementById('editor-title')
     const {keyCode} = event
     // Backspace
     if (keyCode === 8) {
+      // 无内容删除节点和对应节点数据及节点焦点处理
       if (!event.target.innerHTML) {
-        dispatch({type: 'setCurrentNodeKey',payload: {
-          currentNodeKey: null
-        } })
-        
-        const currentDataBlockId = currentRoot.getAttribute('data-block-id')
-        state.nodeOptions.delete(currentDataBlockId)
-        const preNode = currentRoot.previousElementSibling
-        const titleNode = document.getElementById('editor-title')
-        currentRoot.remove()
-        if (preNode) setFocus(preNode)
-        else setFocus(titleNode)
+        handleNoContentFallBack(titleNode, currentRoot)
+      } else {
+        // 有内容则携带内容退回上一节点，同时删除当前节点和节点数据
+        const currentHtml = event.target.innerHTML
+        let preNode = currentRoot.previousElementSibling
+        if (preNode) {
+          // 内容节点回退处理
+          const preKeyNode = preNode.getAttribute('data-block-id')
+          handleContentFallBack(preNode, currentHtml, currentRoot, preKeyNode)
+        } else {
+          // 回退至标题
+          handleContentFallBack(titleNode, currentHtml, currentRoot, null)
+        }
       }
     }
     // Enter
@@ -112,6 +116,48 @@ const getEditNode = (currentParentDom) => {
     }
   }
 
+  /**
+   * @description 有内容回车键处理事件
+   * @param {*} preNode 上一节点
+   * @param {*} currentHtml 当前节点数据
+   * @param {*} currentRoot 当前节点根节点
+   * @param {*} newNodeKey 新节点key
+   */
+  const handleContentFallBack = (preNode, currentHtml, currentRoot, newNodeKey) => {
+    dispatch({type: 'setCurrentNodeKey',payload: {
+      currentNodeKey: newNodeKey
+    }})
+    let preNodeEdit = getEditNode(preNode)
+    const hasPreHtml = preNodeEdit.innerHTML
+    preNodeEdit.innerHTML += currentHtml
+    // 上一节点内容为空时，则修改节点style, 改为有内容
+    if (!hasPreHtml) {
+      const style = 'max-width: 100%; width: 100%;white-space: pre-wrap;word-break: break-word;caret-color: rgb(55, 53, 47);padding: 3px 2px;'
+      preNodeEdit.setAttribute('style', style)
+    }
+    // 删除当前节点
+    const currentDataBlockId = currentRoot.getAttribute('data-block-id')
+    state.nodeOptions.delete(currentDataBlockId)
+    currentRoot.remove()
+    setFocus(preNode)
+  }
+
+  /**
+   * @description 节点无内容事件处理
+   * @param {*} titleNode 标题节点
+   * @param {*} currentRoot 当前节点根目录
+   */
+  const handleNoContentFallBack = (titleNode, currentRoot) => {
+    dispatch({type: 'setCurrentNodeKey',payload: {
+      currentNodeKey: null
+    }})
+    const currentDataBlockId = currentRoot.getAttribute('data-block-id')
+    state.nodeOptions.delete(currentDataBlockId)
+    const preNode = currentRoot.previousElementSibling
+    currentRoot.remove()
+    if (preNode) setFocus(preNode)
+    else setFocus(titleNode)
+  }
   /**
    * @description 节点数据处理
    * @param {*} dataBlockId
