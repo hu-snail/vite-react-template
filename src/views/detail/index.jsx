@@ -34,7 +34,11 @@ export default function Detail() {
    */
   const onKeyDownTitle = (event) => {
     const {keyCode} = event
-    console.log('键盘值：' + keyCode)
+    event.target.oninput = function(e) {
+      const style = 'max-width: 100%; width: 100%;white-space: pre-wrap;word-break: break-word;caret-color: rgb(55, 53, 47);padding: 3px 2px;'
+      if (e.target.innerHTML) e.target.setAttribute('style', style)
+      else e.target.setAttribute('style', style + '-webkit-text-fill-color: rgba(55, 53, 47, 0.15);')
+    }
     // Enter换行
     if (keyCode === 13) {
       const {rootNode, editNode} = createBlockElement()
@@ -166,14 +170,31 @@ const getEditNode = (currentParentDom) => {
     childNode.setAttribute('style', 'display: flex;')
     rootNodeChild.append(childNode)
 
+    const style = 'max-width: 100%; width: 100%;white-space: pre-wrap;word-break: break-word;caret-color: rgb(55, 53, 47);padding: 3px 2px;'
     const editNode = document.createElement('div');
     editNode.setAttribute('placeholder', '输入“/”发起指令');
     editNode.setAttribute('spellCheck', true)
     editNode.setAttribute('data-content-editable-leaf', true)
     editNode.setAttribute('contentEditable', true)
-    editNode.setAttribute('style', 'max-width: 100%; width: 100%;white-space: pre-wrap;word-break: break-word;caret-color: rgb(55, 53, 47);padding: 3px 2px;')
+    editNode.setAttribute('style', style + '-webkit-text-fill-color: rgba(55, 53, 47, 0.15);')
     childNode.append(editNode)
+   
+    bandEditNodeEvent(editNode, style)
+    setNodeKeyData(dataBlockId, rootNode)
 
+    return {rootNode, editNode}
+  }
+
+  /**
+   * @description 绑定输入框事件
+   * @param {*} editNode 输入框节点
+   * @param {*} style 输入框样式
+   */
+  const bandEditNodeEvent = (editNode, style) => {
+    editNode.oninput = function(e) {
+      if (e.target.innerHTML) e.target.setAttribute('style', style)
+      else e.target.setAttribute('style', style + '-webkit-text-fill-color: rgba(55, 53, 47, 0.15);')
+    }
     editNode.onfocus = function(e) {
       if (state.currentNodeKey) {
         const editNode = getEditNode(state.nodeOptions.get(state.currentNodeKey))
@@ -185,15 +206,26 @@ const getEditNode = (currentParentDom) => {
         currentNodeKey: currentNode.getAttribute('data-block-id') 
       }})
     }
-
-    setNodeKeyData(dataBlockId, rootNode)
-
-    return {rootNode, editNode}
   }
 
   return <div className="hu-editor">
       <div className={styles['editor-head']} onKeyDown={onKeyDownTitle}>
-        <div id="editor-title" className={styles['editor-head-title']}  spellCheck="true"  datacontenteditableleaf="true" contentEditable="true" placeholder="无标题">
+        <div id="editor-title" style={{ 
+          maxWidth: '100%',
+          width: '100%',
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+          caretColor: 'rgb(55, 53, 47)',
+          padding: '3px 2px',
+          minHeight: '1em',
+          color: 'rgb(55, 53, 47)',
+          WebkitTextFillColor: 'rgba(55, 53, 47, 0.15)',
+          cursor: 'text'
+        }}
+        spellCheck="true"
+        datacontenteditableleaf="true"
+        contentEditable="true"
+        placeholder="无标题">
         </div>
       </div>
     <div className={styles['editor-content']} id="editor-content" onKeyDown={onKeyDownContent}>

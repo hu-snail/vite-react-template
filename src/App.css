@@ -6,3 +6,6 @@
 [contenteditable]:empty:after, .forcePlaceholder:after {
   content: attr(placeholder);
 }
+[contenteditable]{
+  -webkit-tap-highlight-color: transparent;
+}
