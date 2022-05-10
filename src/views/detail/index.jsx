@@ -6,8 +6,7 @@ import reducer from './reducer'
 
 const initialState = {
   nodeOptions: new Map(),
-  currentNodeKey: null,
-  nodeKeys: []
+  currentNodeKey: null
 };
 
 
@@ -91,13 +90,11 @@ const getEditNode = (currentParentDom) => {
         dispatch({type: 'setCurrentNodeKey',payload: {
           currentNodeKey: null
         } })
+        
         const currentDataBlockId = currentRoot.getAttribute('data-block-id')
         state.nodeOptions.delete(currentDataBlockId)
-        const currentDataIndex = state.nodeKeys.findIndex(key => key === currentDataBlockId)
-        console.log(currentDataIndex, '----')
-        const preNode = currentDataIndex ? state.nodeOptions.get(state.nodeKeys[currentDataIndex - 1]) : null
+        const preNode = currentRoot.previousElementSibling
         const titleNode = document.getElementById('editor-title')
-        state.nodeKeys.splice(currentDataIndex, 1)
         currentRoot.remove()
         if (preNode) setFocus(preNode)
         else setFocus(titleNode)
@@ -123,9 +120,6 @@ const getEditNode = (currentParentDom) => {
   const setNodeKeyData =  (dataBlockId, element) => {
     dispatch({type: 'setNodeOptions',payload: {
       nodeOptions: new Map([...state.nodeOptions, [dataBlockId, element]])
-    } })
-    dispatch({type: 'setNodeKeys',payload: {
-      nodeKeys: [...state.nodeKeys, dataBlockId]
     } })
     dispatch({type: 'setCurrentNodeKey',payload: {
       currentNodeKey: dataBlockId
