@@ -91,6 +91,10 @@ const getEditNode = (currentParentDom) => {
       if (!event.target.innerHTML) {
         handleNoContentFallBack(titleNode, currentRoot)
       } else {
+        var sel = window.getSelection();
+        // 光标位置，光标在内容区域则删除，否则执行回退
+        const focusOffset = sel.baseOffset
+        if (focusOffset) return
         // 有内容则携带内容退回上一节点，同时删除当前节点和节点数据
         const currentHtml = event.target.innerHTML
         let preNode = currentRoot.previousElementSibling
@@ -201,7 +205,7 @@ const getEditNode = (currentParentDom) => {
     let rootNode = document.createElement('div'); 
     rootNode.setAttribute('data-block-id', dataBlockId)
     rootNode.setAttribute('class', 'editor-selectable')
-    rootNode.setAttribute('style', 'width: 100%;max-width: 1691px; margin-top: 1px;marginBottom: 1px;')
+    rootNode.setAttribute('style', 'width: 100%;max-width: 1691px; margin-top: 1px;margin-bottom: 1px;')
     const rootNodeChild = document.createElement('div');
     rootNodeChild.setAttribute('style', 'color: inherit;fill:inherit')
     rootNode.append(rootNodeChild)
