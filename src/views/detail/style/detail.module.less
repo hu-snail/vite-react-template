@@ -1,3 +1,11 @@
+.editor-head-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 3;
+    flex-shrink: 0;
+}
+
 .editor-head {
     color: rgb(55, 53, 47);
     font-weight: 700;
@@ -6,12 +14,60 @@
     font-family: iawriter-mono, Nitti, Menlo, Courier, monospace;
     cursor: text;
     display: flex;
+    max-width: 100%;
+    padding-left: calc(96px + env(safe-area-inset-left));
+    width: 100%;
     align-items: center;
 }
 
+.editor-head-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+.hu-editor {
+    background-color: #fff;
+}
+
+.editor-content-wrap {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    padding-top: 5px;
+}
+
 .editor-content {
+    flex-shrink: 0;
+    flex-grow: 1;
     max-width: 100%;
-    min-width: 0px;
-    width: 900px;
-    padding-right: 0px;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    font-family: iawriter-mono, Nitti, Menlo, Courier, monospace;
+    font-size: 15px;
+    letter-spacing: 0.055em;
+    line-height: 1.6;
+    width: 100%;
+    z-index: 4;
+    padding-bottom: 30vh;
+    padding-left: calc(96px + env(safe-area-inset-left));
+    padding-right: calc(96px + env(safe-area-inset-right));
+}
+
+.content-item-tool {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.content-item-tool-add,
+.content-item-tool-menu {
+    padding: 5px;
 }

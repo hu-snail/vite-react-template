@@ -239,6 +239,21 @@ const getEditNode = (currentParentDom) => {
       if (e.target.innerHTML) e.target.setAttribute('style', style)
       else e.target.setAttribute('style', style + '-webkit-text-fill-color: rgba(55, 53, 47, 0.15);')
     }
+    // editNode.onmouseover = function (e) {
+    //   const toolNode = document.getElementById('editor-tool')
+    //   toolNode.style.display = 'flex'
+    //   toolNode.style.top = e.toElement.offsetTop + 'px'
+    //   toolNode.style.left = e.target.offsetLeft - toolNode.offsetWidth + 'px'
+
+    // }
+    // editNode.onmouseleave = function (e) {
+    //   const toolNode = document.getElementById('editor-tool')
+    //   toolNode.style.display = 'none'
+    // }
+    // editNode.onmouseup = function (e) {
+    //   const toolNode = document.getElementById('editor-tool')
+    //   toolNode.style.display = 'none'
+    // }
     editNode.onfocus = function(e) {
       if (state.currentNodeKey) {
         const editNode = getEditNode(state.nodeOptions.get(state.currentNodeKey))
@@ -252,27 +267,52 @@ const getEditNode = (currentParentDom) => {
     }
   }
 
-  return <div className="hu-editor">
-      <div className={styles['editor-head']} onKeyDown={onKeyDownTitle}>
-        <div id="editor-title" style={{ 
-          maxWidth: '100%',
-          width: '100%',
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
-          caretColor: 'rgb(55, 53, 47)',
-          padding: '3px 2px',
-          minHeight: '1em',
-          color: 'rgb(55, 53, 47)',
-          WebkitTextFillColor: 'rgba(55, 53, 47, 0.15)',
-          cursor: 'text'
-        }}
-        spellCheck="true"
-        datacontenteditableleaf="true"
-        contentEditable="true"
-        placeholder="无标题">
+  const onMouseOverContent = (e) => {
+    console.log(e, '---')
+  }
+
+  return(<div className={styles['hu-editor']}>
+    <div className={styles['editor-head-wrap']}>
+      <div style={{maxWidth: '100%', minWidth: '0px', width: '900px', paddingRight: '0'}}> 
+        <div className={styles['editor-head-content']}>
+          <div style={{maxWidth: '100%', paddingLeft: 'calc(env(safe-area-inset-left))', width: '100%'}}>
+            <div className={styles['editor-head']} onKeyDown={onKeyDownTitle}>
+              <div id="editor-title" style={{ 
+                  maxWidth: '100%',
+                  width: '100%',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  caretColor: 'rgb(55, 53, 47)',
+                  padding: '3px 2px',
+                  minHeight: '1em',
+                  color: 'rgb(55, 53, 47)',
+                  WebkitTextFillColor: 'rgba(55, 53, 47, 0.15)',
+                  cursor: 'text'
+                }}
+                spellCheck="true"
+                datacontenteditableleaf="true"
+                contentEditable="true"
+                placeholder="无标题">
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    <div className={styles['editor-content']} id="editor-content" onKeyDown={onKeyDownContent}>
+      <div className={styles['editor-content-wrap']}>
+        <div style={{maxWidth: '100%', minWidth: '0px', width: '900px', paddingRight: '0'}}> 
+          <div
+          className={styles['editor-content']}
+          id="editor-content"
+          onKeyDown={onKeyDownContent}
+          onMouseOver={onMouseOverContent}>
+          </div>
+        </div>
     </div>
-  </div>;
+    <div id="editor-tool" className={styles['content-item-tool']}>
+        <div className={styles['content-item-tool-add']}> + </div>
+        <div className={styles['content-item-tool-menu']}> ::: </div>
+    </div>
+  </div>
+  )
 }
